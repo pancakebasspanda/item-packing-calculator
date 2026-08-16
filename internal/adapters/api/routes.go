@@ -5,6 +5,17 @@ import (
 )
 
 func RegisterRoutes(mux *http.ServeMux, h *Handler) {
+	// root health check endpoint
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"status":"online","service":"item-packing-calculator"}`))
+	})
+
 	// expose api endpoints
 	mux.HandleFunc("POST /api/v1/packing/calculate", h.HandleCalculate)
 	mux.HandleFunc("POST /api/v1/packs", h.HandleAddSize)
