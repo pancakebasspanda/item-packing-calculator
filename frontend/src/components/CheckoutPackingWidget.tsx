@@ -8,6 +8,7 @@ export default function CheckoutPackingWidget() {
     const [result, setResult] = useState<CalculationResult | null>(null);
     const [error, setError] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isWakingUp, setIsWakingUp] = useState<boolean>(false);
 
     useEffect(() => {
         const quantity = parseInt(quantityInput, 10);
@@ -34,10 +35,18 @@ export default function CheckoutPackingWidget() {
             return;
         }
 
+        // timer variable incase the backend is in cold start uo
+        let wakeupTimer: ReturnType<typeof setTimeout>;
 
         const fetchPacks = async () => {
             setIsLoading(true);
+            setIsWakingUp(false);
             setError('');
+
+            // if the API takes > 3 seconds, show the Render waiting
+            wakeupTimer = setTimeout(() => {
+                setIsWakingUp(true);
+            }, 3000);
 
             try {
                 const data = await calculatePacking(quantity);
@@ -50,13 +59,18 @@ export default function CheckoutPackingWidget() {
                 }
                 setResult(null);
             } finally {
+                clearTimeout(wakeupTimer);
+                setIsWakingUp(false);
                 setIsLoading(false);
             }
         };
 
         // Debounce the API call by 300ms
         const debounceTimer = setTimeout(fetchPacks, 300);
-        return () => clearTimeout(debounceTimer);
+        return () => {
+            clearTimeout(debounceTimer);
+            clearTimeout(wakeupTimer);
+        }
     }, [quantityInput]);
 
     return (
@@ -88,19 +102,19 @@ export default function CheckoutPackingWidget() {
                 />
             </div>
 
-            {isLoading && (
-                <div className="mt-4 text-sm text-gray-500 animate-pulse">
-                    Calculating optimal packaging...
-                </div>
-            )}
-
             {error && (
                 <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
                     {error}
                 </div>
             )}
 
-            {!isLoading && !error && <PackageBreakdown result={result} />}
+            {!error && (
+                <PackageBreakdown
+                    result={result}
+                    isLoading={isLoading}
+                    isWakingUp={isWakingUp}
+                />
+            )}
         </div>
     );
 }

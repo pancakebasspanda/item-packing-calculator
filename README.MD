@@ -69,25 +69,28 @@ curl -X POST http://localhost:8080/api/v1/packing/calculate \
 `POST` to add a new pack size to the system at runtime:
 
 ```shell
-curl -X POST http://localhost:8080/api/v1/packs \
+curl -i -X POST http://localhost:8080/api/v1/packs \
   -H "Content-Type: application/json" \
   -d '{"size": 750}'
 ```
-
-```json
-{ "message": "action completed successfully" }
-```
-
-`DELETE` to remove a pack size from the system at runtime:
 
 ```shell
-curl -X DELETE http://localhost:8080/api/v1/packs \
+HTTP/1.1 201 Created
+Date: Sun, 16 Aug 2026 12:00:00 GMT
+Content-Length: 0
+```
+
+`DELETE` to remove a pack size from the system at runtime. (Returns a 204 No Content status code with no body)
+
+```shell
+curl -i -X DELETE http://localhost:8080/api/v1/packs \
   -H "Content-Type: application/json" \
   -d '{"size": 750}'
 ```
 
-```json
-{ "message": "action completed successfully" }
+```shell
+HTTP/1.1 204 No Content
+Date: Sun, 16 Aug 2026 12:00:00 GMT
 ```
 
 ## Algorithm
