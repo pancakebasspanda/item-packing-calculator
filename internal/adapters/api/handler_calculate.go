@@ -3,12 +3,16 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
+
+// MaxOrderQuantity guards to avoid overflow for int
+const MaxOrderQuantity = math.MaxInt - 100000
 
 // HandleCalculate processes the packing calculation request
 func (h *Handler) HandleCalculate(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +41,17 @@ func (h *Handler) HandleCalculate(w http.ResponseWriter, r *http.Request) {
 		logger.Warn().Int("quantity", req.OrderQuantity).Msg("client requested invalid order quantity")
 
 		// 422 Unprocessable Entity: The JSON was valid, but the value violates business rules
+		respondError(w, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	if req.OrderQuantity > MaxOrderQuantity {
+		err := errors.New("order quantity exceeds maximum supported limit")
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		logger.Warn().Int("quantity", req.OrderQuantity).Msg("client requested order quantity exceeding maximum limit")
+
+		// 422 Unprocessable Entity: The JSON was valid, but the value will cause overflow
 		respondError(w, http.StatusUnprocessableEntity, err.Error())
 		return
 	}

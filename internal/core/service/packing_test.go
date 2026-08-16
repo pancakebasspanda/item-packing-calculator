@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"math"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -129,6 +130,15 @@ func TestCalculatorService_Calculate(t *testing.T) {
 				},
 			},
 			expectedErr: "",
+		},
+		{
+			name:          "returns error when order quantity exceeds safe integer limit",
+			orderQuantity: math.MaxInt,
+			storageMockOutcomes: func(storageMock *mockPorts.MockPackStorage) {
+				// No storage calls expected because validation fails early
+			},
+			expectedResult: domain.CalculationResult{},
+			expectedErr:    "order quantity exceeds maximum supported limit",
 		},
 	}
 

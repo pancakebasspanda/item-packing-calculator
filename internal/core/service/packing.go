@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"item-packing-calculator/internal/adapters/api"
 	"maps"
 	"math"
 
@@ -49,6 +50,13 @@ func (s *CalculatorService) Calculate(ctx context.Context, orderQuantity int) (d
 
 	if orderQuantity <= 0 {
 		err := fmt.Errorf("order quantity must be greater than zero")
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return domain.CalculationResult{}, err
+	}
+
+	if orderQuantity > api.MaxOrderQuantity {
+		err := fmt.Errorf("order quantity exceeds maximum supported limit")
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return domain.CalculationResult{}, err
