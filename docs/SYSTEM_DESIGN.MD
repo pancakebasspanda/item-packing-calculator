@@ -1,8 +1,7 @@
 # System Design Document: Item Packing Calculator
 
 ## System Overview
-The Item Packing Calculator is a stateless microservice built in Go using a Ports and Adapters (Hexagonal) architecture. It computes the mathematical minimum set of package sizes required to fulfill an order quantity while guaranteeing zero partial packs, zero under-shipping, and the absolute lowest pack count possible.
-
+The Item Packing Calculator is a highly flexible Go API designed around clean architecture. Its main job is to calculate the most efficient packaging combination for a given order, ensuring that you ship the absolute lowest number of packs, send no partially filled packs, and never under-ship an order.
 ## Architecture Diagram
 
 [//]: # ()
@@ -39,13 +38,7 @@ The Item Packing Calculator is a stateless microservice built in Go using a Port
 
 ## Packing Algorithm Design
 
-The domain algorithm combines recursive search with greedy bulk-reduction to balance accuracy and execution speed:
-
-* **Bulk Reduction (Large Quantities):** Eagerly subtracts the largest available pack size from orders exceeding operational thresholds. This reduces target values to bounded sizes and eliminates stack overflow / memory exhaustion risks.
-* **Recursive Branch-and-Bound Search:** Evaluates remaining target values against all active pack permutations to find the optimal solution satisfying:
-    1. $\text{Total Items Shipped} \ge \text{Order Quantity}$
-    2. $\text{Minimize } (\text{Total Items Shipped} - \text{Order Quantity})$
-    3. $\text{Minimize } (\text{Total Pack Count})$
+To balance accuracy and execution speed, the domain algorithm combines a smart recursive search with a greedy bulk-reduction strategy. For very large orders, it first uses the largest available pack sizes to fulfill the bulk of the items, which prevents memory exhaustion. It then runs the recursive search on the remaining items and seamlessly combines the two results into a single response
 
 ## API & Interface Specifications
 

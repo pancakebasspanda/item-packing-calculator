@@ -19,7 +19,7 @@ func FuzzCalculate(f *testing.F) {
 	f.Add(0)
 	f.Add(-1)
 
-	// 2. Setup (runs once)
+	// setup (runs once)
 	initialSizes := []int{5000, 2000, 1000, 500, 250}
 	store := storage.NewMemoryStorage(initialSizes)
 	calculatorService := service.NewCalculatorService(store)
@@ -36,7 +36,7 @@ func FuzzCalculate(f *testing.F) {
 			return
 		}
 
-		// The packs returned must have enough capacity for the order
+		// the packs returned must have enough capacity for the order
 		if err == nil {
 			totalCapacityCalculated := 0
 			for _, pack := range result.Packs {

@@ -9,7 +9,7 @@ import (
 )
 
 // rateLimiter implements a per-IP token bucket rate limiter.
-// Each unique IP gets its own bucket. Tokens refill at a fixed rate,
+// each unique IP gets its own bucket. Tokens refill at a fixed rate,
 type rateLimiter struct {
 	mu       sync.Mutex
 	buckets  map[string]*tokenBucket
@@ -103,12 +103,12 @@ func getClientIP(r *http.Request) string {
 		return strings.TrimSpace(ips[0]) // Extract real client IP
 	}
 
-	// 2. Parse X-Real-IP
+	// parse X-Real-IP
 	if realIP := r.Header.Get("X-Real-IP"); realIP != "" {
 		return strings.TrimSpace(realIP)
 	}
 
-	// 3. Fallback to RemoteAddr (strip the :port number)
+	// fallback to RemoteAddr (strip the :port number)
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr
@@ -116,6 +116,7 @@ func getClientIP(r *http.Request) string {
 	return ip
 }
 
+// min finds the min between two numbers
 func min(a, b int) int {
 	if a < b {
 		return a

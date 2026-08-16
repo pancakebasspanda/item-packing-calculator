@@ -12,10 +12,10 @@ import (
 )
 
 // setupTelemetry initialises the OpenTelemetry provider and exporter.
-// If otelEndpoint is empty or the exporter cannot be created, it falls back to
-// a no-op provider so the server starts cleanly without Jaeger available.
-// It sets the global TracerProvider and returns a shutdown function for main to defer.
 func setupTelemetry(ctx context.Context) *trace.TracerProvider {
+
+	// If otelEndpoint is empty or the exporter cannot be created, it falls back to
+	// a no-op provider so the server starts cleanly without Jaeger available.
 	if otelEndpoint == "" {
 		logger.Warn().Msg("otel-endpoint not set — tracing disabled, using no-op provider")
 		otel.SetTracerProvider(noop.NewTracerProvider())
@@ -48,7 +48,7 @@ func setupTelemetry(ctx context.Context) *trace.TracerProvider {
 		trace.WithResource(res),
 	)
 
-	// Set the global provider so handlers can access it later to create spans
+	// set the global provider so handlers can access it later to create spans
 	otel.SetTracerProvider(tracerProvider)
 
 	logger.Info().Str("endpoint", otelEndpoint).Msg("otel tracing enabled")
