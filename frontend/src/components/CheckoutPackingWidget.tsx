@@ -8,25 +8,23 @@ export default function CheckoutPackingWidget() {
     const [result, setResult] = useState<CalculationResult | null>(null);
     const [error, setError] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isWakingUp, setIsWakingUp] = useState<boolean>(false);
 
     useEffect(() => {
         const quantity = parseInt(quantityInput, 10);
 
-        // If the input is completely empty (NaN from backspacing), clear the UI quietly
         if (isNaN(quantity)) {
             setResult(null);
             setError('');
             return;
         }
 
-       // If they explicitly typed 0 or a negative number, show a helpful error immediately
         if (quantity <= 0) {
             setResult(null);
             setError('Order quantity must be greater than zero');
             return;
         }
 
-        // max limit check
         const MAX_ITEMS = Number.MAX_SAFE_INTEGER;
         if (quantity > MAX_ITEMS) {
             setResult(null);
@@ -34,10 +32,17 @@ export default function CheckoutPackingWidget() {
             return;
         }
 
+        let wakeupTimer: ReturnType<typeof setTimeout>;
 
         const fetchPacks = async () => {
             setIsLoading(true);
+            setIsWakingUp(false);
             setError('');
+
+            // If the server takes longer than 3 seconds, assume a cold start
+            wakeupTimer = setTimeout(() => {
+                setIsWakingUp(true);
+            }, 3000);
 
             try {
                 const data = await calculatePacking(quantity);
@@ -50,13 +55,18 @@ export default function CheckoutPackingWidget() {
                 }
                 setResult(null);
             } finally {
+                clearTimeout(wakeupTimer);
                 setIsLoading(false);
+                setIsWakingUp(false);
             }
         };
 
-        // Debounce the API call by 300ms
         const debounceTimer = setTimeout(fetchPacks, 300);
-        return () => clearTimeout(debounceTimer);
+
+        return () => {
+            clearTimeout(debounceTimer);
+            clearTimeout(wakeupTimer);
+        };
     }, [quantityInput]);
 
     return (
@@ -89,8 +99,21 @@ export default function CheckoutPackingWidget() {
             </div>
 
             {isLoading && (
-                <div className="mt-4 text-sm text-gray-500 animate-pulse">
-                    Calculating optimal packaging...
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100 flex items-center gap-3 transition-all">
+                    <svg className="animate-spin h-5 w-5 text-blue-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <div>
+                        <p className="text-sm font-medium text-blue-900">
+                            Calculating optimal packaging...
+                        </p>
+                        {isWakingUp && (
+                            <p className="text-xs text-blue-700 mt-0.5 animate-pulse">
+                                Waking up server instance on Render. This may take up to 30 seconds...
+                            </p>
+                        )}
+                    </div>
                 </div>
             )}
 
