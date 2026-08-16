@@ -1,6 +1,6 @@
 import { CalculationResult, ErrorResponse } from '../types/types';
 
-const API_BASE = 'http://localhost:8080/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080/api/v1';
 
 export const calculatePacking = async (quantity: number): Promise<CalculationResult> => {
     const response = await fetch(`${API_BASE}/packing/calculate`, {
