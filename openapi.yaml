@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  title: Item Packing Calculator API
+  version: 1.0.0
+  description: API for calculating optimal pack combinations for orders and managing available pack sizes.
+servers:
+  - url: /api/v1
+paths:
+  /packing/calculate:
+    post:
+      summary: Calculate optimal packing for an order
+      operationId: calculatePacking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculateRequest'
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculateResponse'
+        '400':
+          description: Invalid JSON payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Business validation failed (e.g., quantity <= 0)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /packs:
+    post:
+      summary: Add a new pack size
+      operationId: addPackSize
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SizeRequest'
+      responses:
+        '201':
+          description: Pack size added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid JSON payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Business validation failed (e.g., size <= 0)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Remove an existing pack size
+      operationId: removePackSize
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SizeRequest'
+      responses:
+        '200':
+          description: Pack size removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid JSON payload or size not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CalculateRequest:
+      type: object
+      required:
+        - orderQuantity
+      properties:
+        orderQuantity:
+          type: integer
+          example: 501
+          description: The number of items the customer ordered.
+
+    CalculateResponse:
+      type: object
+      properties:
+        orderQuantity:
+          type: integer
+          example: 501
+        totalItems:
+          type: integer
+          example: 750
+        totalPacks:
+          type: integer
+          example: 2
+        packs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackResult'
+
+    PackResult:
+      type: object
+      properties:
+        packSize:
+          type: integer
+          example: 500
+        quantity:
+          type: integer
+          example: 1
+
+    SizeRequest:
+      type: object
+      required:
+        - size
+      properties:
+        size:
+          type: integer
+          example: 250
+          description: The pack size to add or remove.
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "action completed successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "order quantity must be greater than zero"
