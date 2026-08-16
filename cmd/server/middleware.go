@@ -43,7 +43,7 @@ func setUpMiddleware() []func(http.Handler) http.Handler {
 		Logger()
 
 	// 60 requests per second per IP — generous for legitimate use, effective against abuse
-	limiter := newRateLimiter(60, time.Second)
+	limiter := newRateLimiter(10, time.Second)
 
 	return []func(http.Handler) http.Handler{
 		// 1. Rate limit — outermost so abuse is rejected before any other work

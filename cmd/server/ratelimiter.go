@@ -1,7 +1,9 @@
 package main
 
 import (
+	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -80,22 +82,38 @@ func (rl *rateLimiter) cleanupLoop() {
 // middleware returns an http.Handler middleware that enforces the rate limit.
 func (rl *rateLimiter) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ip := r.RemoteAddr
-
-		// When behind a proxy or load balancer, prefer the real client IP
-		if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-			ip = forwarded
-		} else if real := r.Header.Get("X-Real-IP"); real != "" {
-			ip = real
-		}
+		ip := getClientIP(r)
 
 		if !rl.allow(ip) {
-			http.Error(w, `{"error":"rate limit exceeded — too many requests"}`, http.StatusTooManyRequests)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusTooManyRequests)
+			_, _ = w.Write([]byte(`{"error":"rate limit exceeded — too many requests"}`))
 			return
 		}
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// getClientIP checks for clientIPs supplied in different formatting
+func getClientIP(r *http.Request) string {
+	// 1. Parse X-Forwarded-For (Render / proxies send: "client, proxy1, proxy2")
+	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+		ips := strings.Split(forwarded, ",")
+		return strings.TrimSpace(ips[0]) // Extract real client IP
+	}
+
+	// 2. Parse X-Real-IP
+	if realIP := r.Header.Get("X-Real-IP"); realIP != "" {
+		return strings.TrimSpace(realIP)
+	}
+
+	// 3. Fallback to RemoteAddr (strip the :port number)
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return ip
 }
 
 func min(a, b int) int {
