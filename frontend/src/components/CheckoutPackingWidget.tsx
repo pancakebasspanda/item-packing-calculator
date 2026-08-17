@@ -43,7 +43,7 @@ export default function CheckoutPackingWidget() {
             setIsWakingUp(false);
             setError('');
 
-            // if the API takes > 3 seconds, show the Render waiting
+            // if the API takes > 3 seconds
             wakeupTimer = setTimeout(() => {
                 setIsWakingUp(true);
             }, 3000);

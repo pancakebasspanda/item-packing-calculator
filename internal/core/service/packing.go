@@ -72,14 +72,14 @@ func (s *CalculatorService) Calculate(ctx context.Context, orderQuantity int) (d
 
 	largestSize := sizes[0] // since sizes is sorted descending
 
-	// 1. Optimize large orders by allocating the bulk of the items into the biggest packs
+	// optimize large orders by allocating the bulk of the items into the biggest packs
 	orderQuantity, biggestAvailablePacks := s.preCalculateBulkPacks(orderQuantity, largestSize)
 
-	// 2. find the remaining number of packs needed as per the rules
+	// find the remaining number of packs needed as per the rules
 	knownSolutions := make(map[int]*PackingSolution)
 	remainderSolution := s.findOptimalPacks(orderQuantity, sizes, knownSolutions)
 
-	// 3. Merge calculations and format the response
+	// merge calculations and format the response
 	result := s.buildFinalResult(requestedQuantity, sizes, biggestAvailablePacks, remainderSolution)
 
 	span.SetAttributes(

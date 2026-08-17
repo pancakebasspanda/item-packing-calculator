@@ -22,7 +22,7 @@ type tokenBucket struct {
 	lastSeen time.Time
 }
 
-// Example: newRateLimiter(10, time.Second) → 10 req/s per IP.
+// Example: newRateLimiter(10, time.Second) 10 req/s per IP.
 func newRateLimiter(capacity int, rate time.Duration) *rateLimiter {
 	rl := &rateLimiter{
 		buckets:  make(map[string]*tokenBucket),
