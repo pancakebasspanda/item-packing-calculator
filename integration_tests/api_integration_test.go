@@ -93,14 +93,14 @@ func TestIntegration_AddPackSizeEndpoint(t *testing.T) {
 		{
 			name:           "Valid addition",
 			requestBody:    `{"size": 999}`,
-			expectedStatus: http.StatusCreated, // 201 Created
-			expectedJSON:   "",                 // Your API returns an empty body on success
+			expectedStatus: http.StatusCreated, // 201
+			expectedJSON:   "",
 		},
 		{
 			name:           "Invalid addition - zero size",
 			requestBody:    `{"size": 0}`,
-			expectedStatus: http.StatusConflict,                                // 409 Conflict based on test output
-			expectedJSON:   `{"error": "pack size must be greater than zero"}`, // Update this string if the API actually returns something different for 409
+			expectedStatus: http.StatusConflict, // 409
+			expectedJSON:   `{"error": "pack size must be greater than zero"}`,
 		},
 	}
 
@@ -135,8 +135,8 @@ func TestIntegration_RemovePackSizeEndpoint(t *testing.T) {
 		{
 			name:           "Valid removal - existing size",
 			requestBody:    `{"size": 250}`,
-			expectedStatus: http.StatusNoContent, // 204 No Content based on test output
-			expectedJSON:   "",                   // 204 implies no body
+			expectedStatus: http.StatusNoContent, // 204
+			expectedJSON:   "",
 		},
 		{
 			name:           "Remove non-existent size",

@@ -147,7 +147,7 @@ func TestHandler_HandleAddSize(t *testing.T) {
 					Return(nil)
 			},
 			expectedStatus: http.StatusCreated,
-			expectedBody:   "", // Empty body for successful creation responses
+			expectedBody:   "",
 		},
 	}
 
@@ -208,7 +208,7 @@ func TestHandler_HandleRemoveSize(t *testing.T) {
 					Return(nil)
 			},
 			expectedStatus: http.StatusNoContent,
-			expectedBody:   "", // Empty body for no-content responses
+			expectedBody:   "",
 		},
 	}
 
