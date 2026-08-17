@@ -24,7 +24,7 @@ export default function PackageBreakdown({ result, isLoading, isWakingUp }: Pack
                     {/* Render Cold Start Warning */}
                     {isWakingUp && (
                         <p className="text-xs text-gray-600 mt-1 animate-pulse">
-                            Waking up backend server on Render. This may take up to 50 seconds...
+                            Waking up backend server. This may take up to 50 seconds...
                         </p>
                     )}
                 </div>

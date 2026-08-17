@@ -93,6 +93,34 @@ HTTP/1.1 204 No Content
 Date: Sun, 16 Aug 2026 12:00:00 GMT
 ```
 
+error codes
+
+```shell
+curl -i -X POST http://localhost:8080/api/v1/packing/calculate \
+  -H "Content-Type: application/json" \
+  -d '{"orderQuantity": -500}'
+```
+
+```shell
+HTTP/1.1 422 Unprocessable Entity
+Date: Sun, 16 Aug 2026 19:01:24 GMT
+
+{"error":"order quantity must be greater than zero"}
+```
+
+```shell
+curl -i -X POST http://localhost:8080/api/v1/packing/calculate \
+  -H "Content-Type: application/json" \
+  -d '{"orderQuantity": hello}'
+```
+
+```shell
+HTTP/1.1 400 Bad Request
+Date: Sun, 16 Aug 2026 19:01:41 GMT
+
+{"error":"Invalid JSON payload"}
+```
+
 ## Algorithm
 The packing service uses a smart recursive search to find the best pack combination for any order.
 
